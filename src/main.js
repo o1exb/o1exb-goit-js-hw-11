@@ -1,6 +1,4 @@
-import 'izitoast/dist/css/iziToast.min.css';
-import 'simplelightbox/dist/simple-lightbox.min.css';
-
+import './css/styles.css';
 import { getImagesByQuery } from './js/pixabay-api';
 import {
   createGallery,
@@ -9,15 +7,15 @@ import {
   hideLoader,
 } from './js/render-functions';
 import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 
 const form = document.querySelector('.form');
-const input = form.querySelector('input[name="search-text"]');
 
-form.addEventListener('submit', async event => {
-  event.preventDefault();
-  const query = input.value.trim();
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const searchValue = e.target.elements['search-text'].value.trim();
 
-  if (!query) {
+  if (!searchValue) {
     iziToast.warning({ message: 'Please enter a search term.' });
     return;
   }
@@ -25,19 +23,26 @@ form.addEventListener('submit', async event => {
   clearGallery();
   showLoader();
 
-  try {
-    const data = await getImagesByQuery(query);
-    if (data.hits.length === 0) {
-      iziToast.info({
-        message:
-          'Sorry, there are no images matching your search query. Please try again!',
-      });
-    } else {
+  setTimeout(async () => {
+    try {
+      const data = await getImagesByQuery(searchValue);
+
+      if (data.hits.length === 0) {
+        iziToast.info({
+          message:
+            'Sorry, there are no images matching your search query. Please try again!',
+        });
+        hideLoader();
+        return;
+      }
+
       createGallery(data.hits);
+    } catch (error) {
+      console.error('Error fetching images:', error);
+      iziToast.error({ message: 'Something went wrong.' });
+    } finally {
+      hideLoader();
+      e.target.reset();
     }
-  } catch (error) {
-    iziToast.error({ message: 'An error occurred while fetching images.' });
-  } finally {
-    hideLoader();
-  }
+  }, 1000); // Затримка в 1000 мілісекунд (1 секунда)
 });

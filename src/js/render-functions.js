@@ -1,17 +1,42 @@
-import axios from 'axios';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const API_KEY = '49857311-6635cfa9567008bd9332ca8ce';
-const BASE_URL = 'https://pixabay.com/api/';
+const galleryContainer = document.querySelector('.gallery');
+const loader = document.querySelector('.loader');
 
-export async function getImagesByQuery(query) {
-  const params = {
-    key: API_KEY,
-    q: query,
-    image_type: 'photo',
-    orientation: 'horizontal',
-    safesearch: true,
-  };
+let lightbox = new SimpleLightbox('.gallery a');
 
-  const response = await axios.get(BASE_URL, { params });
-  return response.data;
+export function createGallery(images) {
+  const markup = images
+    .map(
+      image => `
+    <li class="gallery-item">
+      <a href="${image.largeImageURL}">
+        <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" />
+      </a>
+      <div class="info">
+        <p><span class="info-title"><strong>Likes</strong></span> ${image.likes}</p>
+        <p><span class="info-title"><strong>Views</strong></span> ${image.views}</p>
+        <p><span class="info-title"><strong>Comments</strong></span> ${image.comments}</p>
+        <p><span class="info-title"><strong>Downloads</strong></span> ${image.downloads}</p>
+      </div>
+    </li>
+  `
+    )
+    .join('');
+
+  galleryContainer.insertAdjacentHTML('beforeend', markup);
+  lightbox.refresh();
+}
+
+export function clearGallery() {
+  galleryContainer.innerHTML = '';
+}
+
+export function showLoader() {
+  loader.classList.remove('hidden');
+}
+
+export function hideLoader() {
+  loader.classList.add('hidden');
 }
