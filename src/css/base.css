@@ -120,6 +120,8 @@ p {
   font-size: 16px;
   color: #2e2f42;
   padding: 20px;
+  display: block;
+  width: 100%;
 }
 
 .hidden {
